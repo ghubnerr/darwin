@@ -10,12 +10,19 @@ from kivy_garden.graph import Graph, LinePlot, MeshLinePlot, Plot, SmoothLinePlo
 from kivymd.app import MDApp
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
+from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.screenmanager import ScreenManager
+from kivymd.uix.tab import MDTabsBase
 from src.ai.train import ThreadedTrainer
 from src.ai.utils import clamp
 from src.gameList import GameDict, gameList
 from src.ui.game import Game
 from src.ui.gameModal import GameModal
+
+
+class Tab(MDFloatLayout, MDTabsBase):
+    pass
+
 
 KV = """
 <Manager>:
@@ -24,32 +31,33 @@ KV = """
     MDScreen:
         name: "main"
 
+        MDTabs:
+            Tab:
+                title: "Training"
+                content_text: "Train the Ai"
+
+                MDScrollView:
+                    MDGridLayout:
+                        padding: 10, 50
+                        cols: 5
+                        id: images_grid
+                        size_hint_y: None
+                        height: self.minimum_height  #<<<<<<<<<<<<<<<<<<<<
+                        spacing: 10
+                        row_default_height: "300dp"
+                        col_default_width: "200dp"
+                        col_force_default: True
+
         MDAnchorLayout:
             anchor_x: "right"
             anchor_y: "top"
-            padding_top: 50
+            padding: 0, 10
 
-            MDRectangleFlatIconButton:
+            MDFillRoundFlatIconButton:
                 icon: "cog"
                 text: "Settings"
                 on_press: app.open_settings()
 
-        MDAnchorLayout:
-            anchor_x: "center"
-            anchor_y: "top"
-            padding: 0, 100, 0, 0
-
-            MDScrollView:
-                MDGridLayout:
-                    padding: 10, 50
-                    cols: 5
-                    id: images_grid
-                    size_hint_y: None
-                    height: self.minimum_height  #<<<<<<<<<<<<<<<<<<<<
-                    spacing: 10
-                    row_default_height: "300dp"
-                    col_default_width: "200dp"
-                    col_force_default: True
 
 
     MDScreen:
