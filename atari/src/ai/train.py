@@ -6,8 +6,6 @@ from typing import Callable
 
 from humanize import naturaldelta
 from IPython.core.magics.execution import _format_time
-from sympy import use
-
 from src.ai.trainer import Trainer
 from ui.settings import get_setting
 

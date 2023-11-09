@@ -9,3 +9,5 @@ imageio[ffmpeg]==2.31.*
 matplotlib== 3.8.*
 nptyping==2.5.*
 humanize==4.8.*
+kivy-garden.graph==0.4.0
+notebook==7.0.6
