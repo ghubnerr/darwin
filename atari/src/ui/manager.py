@@ -1,8 +1,14 @@
 import csv
+import json
 import multiprocessing
 import os
+from datetime import datetime
 from typing import List
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.properties import StringProperty
@@ -197,6 +203,7 @@ class Manager(ScreenManager):
 
     def on_done(self):
         print("Done Training")
+        self.save_metadata()
 
         self.training = False
         self.rewards = []
@@ -207,6 +214,50 @@ class Manager(ScreenManager):
         self.avg_plt.points = []
 
         Clock.schedule_once(lambda *_, **__: setattr(self, "current", "main"))
+
+    def save_metadata(self):
+        data = {
+            "rewards": self.rewards,
+            "losses": self.losses,
+            "avg_rewards": self.avg_plt.points,
+            "id": self.trainer.trainer.id,
+            "env": self.trainer.trainer.env_name,
+            "lr": self.trainer.trainer.lr,
+            "epochs": self.trainer.trainer.epochs,
+            "batch_size": self.trainer.trainer.batch_size,
+            "use_ddqn": self.trainer.trainer.use_ddqn,
+            "eval_freq": self.trainer.trainer.eval_freq,
+            "device": self.trainer.trainer.device,
+            "epochs": self.trainer.trainer.epochs,
+            "steps": self.trainer.trainer.n_epochs,
+            "created": datetime.now().isoformat(),
+        }
+        d = os.path.join(self.trainer.trainer.log_dir, "metadata.json")
+
+        json.dump(data, open(d, "w"))
+
+        self.save_plt()
+        pass
+
+    def save_plt(self):
+        plt.ioff()
+
+        plt.figure(1)
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.plot(range(len(self.losses)), self.losses, label="loss")
+        # plt.plot(range(len(self.avg_plt.points)), self.avg_plt.points, label="avg")
+        plt.legend()
+        plt.figure(2)
+        plt.xlabel("Epoch")
+        plt.ylabel("Reward")
+        plt.plot(range(len(self.rewards)), self.rewards, label="reward")
+        plt.plot(
+            range(len(self.avg_plt.points)), self.avg_plt.points, label="avg reward"
+        )
+        plt.legend()
+
+        plt.savefig(os.path.join(self.trainer.trainer.log_dir, "data.png"))
 
     def on_update(self, txt: str):
         self.training_txt_widget.text = txt

@@ -101,12 +101,9 @@ class Trainer:
             methodname = model
 
         self.uuid = uuid()[:10]
+        self.id = f"{env_name.split('/')[-1]}-{methodname}-{self.uuid}"
 
-        self.log_dir = os.path.join(
-            self.data_path,
-            f"{env_name.split('/')[-1]}-{methodname}-{self.uuid}",
-            methodname,
-        )
+        self.log_dir = os.path.join(self.data_path, self.id)
 
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
