@@ -12,11 +12,11 @@ import torch
 import torch as T
 import torch.nn as nn
 from numpy import Infinity
-from torch import optim
-
+from shortuuid import uuid
 from src.ai.model import DQN, DuelDQN
 from src.ai.utils import ReplayMemory, Transition, VideoRecorder
 from src.ai.wrapper import AtariWrapper
+from torch import optim
 
 obs_type = npt.NDArray[npt.Shape["84, 84"], npt.Number]
 
@@ -59,8 +59,7 @@ class Trainer:
         max_timesteps=2_500,
         max_timesteps_calc="lowest",
         logging=False,
-        models_path="./models",
-        video_log_dir="./videos",
+        data_path="./data",
         **kwargs: float,
     ) -> None:
         self.env_name = env_name
@@ -71,7 +70,7 @@ class Trainer:
         self.batch_size = batch_size
         self.use_ddqn = use_ddqn
         self.eval_freq = eval_freq
-        self.video_log_dir = video_log_dir
+        self.data_path = data_path
 
         self.logging = logging
 
@@ -95,17 +94,31 @@ class Trainer:
 
         self.env = AtariWrapper(self.env, max_episode_steps=self.spec.max_episode_steps)
         self.n_action = self.env.action_space.n  # type: ignore
-        self.models_path = models_path
 
         if use_ddqn:
             methodname = f"double_{model}"
         else:
             methodname = model
+
+        self.uuid = uuid()[:10]
+
         self.log_dir = os.path.join(
-            self.models_path, os.path.join(f"{env_name.split('/')[-1]}", methodname)
+            self.data_path,
+            f"{env_name.split('/')[-1]}-{methodname}-{self.uuid}",
+            methodname,
         )
+
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
+
+        self.video_log_dir = os.path.join(self.log_dir, "videos")
+        self.model_dir = os.path.join(self.log_dir, "models")
+
+        if not os.path.exists(self.video_log_dir):
+            os.makedirs(self.video_log_dir)
+
+        if not os.path.exists(self.model_dir):
+            os.makedirs(self.model_dir)
 
         self.video = VideoRecorder(self.video_log_dir)
 
@@ -342,16 +355,16 @@ class Trainer:
             self.save()
             print(f"Eval epoch {self.n_epochs}: Reward {evalreward}")
 
-    def save(self, file: str | None = None) -> bool:
+    def save(self, dir: str | None = None) -> bool:
         """Saves the model and other data to a file
 
         Returns if the save was successful
         """
-        file = file if file is not None else self.log_dir
+        dir = dir if dir is not None else self.model_dir
         try:
             torch.save(
                 self.policy_net,
-                os.path.join(file, f"model{self.n_epochs}.pth"),
+                os.path.join(dir, f"{self.n_epochs}.pth"),
             )
             return True
         except:
@@ -399,7 +412,7 @@ class Trainer:
     def save_and_close(self):
         """Saves and closes the environment"""
 
-        self.save("../../models")
+        self.save()
         self.close()
 
     def training_loop(

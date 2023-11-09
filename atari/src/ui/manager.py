@@ -1,3 +1,4 @@
+import csv
 import multiprocessing
 import os
 from typing import List
@@ -114,7 +115,7 @@ class Manager(ScreenManager):
 
     def stop_training(self):
         if self.training:
-            self.trainer.stop()
+            self.trainer.end()
 
     def check_if_trained(self, data: GameDict) -> bool:
         directory = "./models"
@@ -197,8 +198,6 @@ class Manager(ScreenManager):
     def on_done(self):
         print("Done Training")
 
-        self.trainer = None
-
         self.training = False
         self.rewards = []
         self.losses = []
@@ -207,7 +206,7 @@ class Manager(ScreenManager):
         self.loss_plt.points = []
         self.avg_plt.points = []
 
-        self.current = "main"
+        Clock.schedule_once(lambda *_, **__: setattr(self, "current", "main"))
 
     def on_update(self, txt: str):
         self.training_txt_widget.text = txt

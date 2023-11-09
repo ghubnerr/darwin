@@ -11,3 +11,4 @@ nptyping==2.5.*
 humanize==4.8.*
 kivy-garden.graph==0.4.0
 notebook==7.0.6
+shortuuid==1.0.11

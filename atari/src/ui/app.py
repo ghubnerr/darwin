@@ -1,11 +1,10 @@
 import json
 from json import dumps, loads
 
+import ui.manager
 from kivy.lang import Builder
 from kivy.uix.settings import SettingsWithSidebar
 from kivymd.app import MDApp
-
-import ui.manager
 from src.path import join
 
 settings_list = loads(open(join("assets", "settings.json")).read())
@@ -70,7 +69,7 @@ class MainApp(MDApp):
                 "max_timesteps": 2_500,
                 "max_timesteps_calc": "lowest",
                 "device": "cpu",
-                "models": "./models",
+                "data_path": "./data",
             },
         )
 
