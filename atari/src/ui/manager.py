@@ -1,17 +1,14 @@
-import csv
 import json
 import multiprocessing
 import os
 from datetime import datetime
-from typing import List
+from typing import Iterable, List, TypedDict
 
-import json_numpy
-import matplotlib
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.properties import StringProperty
 from kivy.uix.label import Label
-from kivy_garden.graph import Graph, LinePlot, MeshLinePlot, Plot, SmoothLinePlot
+from kivy_garden.graph import Graph, Plot, SmoothLinePlot
 from kivymd.app import MDApp
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
@@ -19,10 +16,11 @@ from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.screenmanager import ScreenManager
 from kivymd.uix.tab import MDTabsBase
 from src.ai.train import ThreadedTrainer
-from src.ai.utils import clamp
 from src.gameList import GameDict, gameList
 from src.ui.game import Game
 from src.ui.gameModal import GameModal
+
+from cartpole.main import load_trained
 
 
 class Tab(MDFloatLayout, MDTabsBase):
@@ -46,6 +44,20 @@ KV = """
                         padding: 10, 50
                         cols: 5
                         id: images_grid
+                        size_hint_y: None
+                        height: self.minimum_height  #<<<<<<<<<<<<<<<<<<<<
+                        spacing: 10
+                        row_default_height: "300dp"
+                        col_default_width: "200dp"
+                        col_force_default: True
+            Tab:
+                title: "Load Trained"
+                content_text: "Load a trained model"
+
+                    MDGridLayout:
+                        padding: 10, 50
+                        cols: 5
+                        id: trained_grid
                         size_hint_y: None
                         height: self.minimum_height  #<<<<<<<<<<<<<<<<<<<<
                         spacing: 10
@@ -106,6 +118,8 @@ class Manager(ScreenManager):
     reward_plt: Plot
     loss_plt: Plot
     avg_plt: Plot
+
+    trained_games: List[GameDict]
 
     rewards: List[float] = []
     losses: List[float] = []
@@ -248,6 +262,8 @@ class Manager(ScreenManager):
             g = Game(game, on_press=self.on_game_press)
             g.on_press = self.on_game_press
             grid.add_widget(g)
+
+        self.games = load_trained()
 
         self.reward_plt = SmoothLinePlot(color=[0, 1, 0, 1])
         self.loss_plt = SmoothLinePlot(color=[1, 0, 0, 1])
