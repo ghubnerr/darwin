@@ -13,11 +13,12 @@ def train():
     #alpha = lr for actor
     #beta = lr for critic
     #original values: alpha = 0.000025, beta = 0.00025
-    agent.load_models()
 
     agent = Agent(alpha=0.000025, beta=0.000025, input_dims=[input_dims_gv], tau=0.001, env=env, batch_size=64, layer1_size=400, layer2_size=300, n_actions=num_actions_gv)
     np.random.seed(0)
     score_history = []
+    agent.load_models()
+
 
     for i in range(num_episodes):
         done = False
