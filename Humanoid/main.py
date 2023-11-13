@@ -8,7 +8,7 @@ num_actions_gv = 17
 num_episodes = 100000
 
 def train():
-    env = gym.make('Humanoid-v4', ctrl_cost_weight=0.1, reset_noise_scale=0.1, exclude_current_positions_from_observation=True, terminate_when_unhealthy=True)
+    env = gym.make('Humanoid-v4', ctrl_cost_weight=0.1, reset_noise_scale=0.1, exclude_current_positions_from_observation=True, terminate_when_unhealthy=True, render_mode=None)
 
     #alpha = lr for actor
     #beta = lr for critic
