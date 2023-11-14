@@ -76,4 +76,4 @@ def load_trained():
     plt.ylabel('Score')
     plt.show()
 
-train()
+load_trained()
