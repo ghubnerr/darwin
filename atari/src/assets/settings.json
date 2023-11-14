@@ -64,13 +64,6 @@
   },
   {
     "type": "path",
-    "title": "Models folder",
-    "desc": "Where to save and load the AI models from",
-    "section": "AI Settings",
-    "key": "models"
-  },
-  {
-    "type": "path",
     "title": "Data folder",
     "desc": "Where to save and load the AI models from and their videos",
     "section": "AI Settings",

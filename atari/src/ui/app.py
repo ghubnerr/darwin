@@ -30,21 +30,6 @@ settings = dumps(
 )
 
 KV = """
-# MDBoxLayout:
-#     MDNavigationRail:
-#         id: navigation_rail
-#         md_bg_color: "#fffcf4"
-#         selected_color_background: "#e7e4c0"
-#         ripple_color_item: "#e7e4c0"
-#         on_item_release: app.switch_screen(*args)
-#             MDNavigationRailItem:
-#                 text: "Train"
-#                 icon: "robot-confused"
-
-#             MDNavigationRailItem:
-#                 text: "Load Model"
-#                 icon: "robot-excited"
-    # Manager:
 Manager:
     id: manager
 

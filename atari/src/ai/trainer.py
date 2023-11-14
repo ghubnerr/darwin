@@ -395,9 +395,6 @@ class Trainer:
 
         Returns if the saved
         """
-        # Prevents saving multiple times
-        if self.saved:
-            return True
 
         dir = dir if dir is not None else self.model_dir
 
@@ -409,17 +406,15 @@ class Trainer:
 
             self.save_metadata()
 
-            self.saved = True
             return True
         except:
-            self.saved = False
             return False
 
     def save_metadata(self):
-        d = os.path.join(self.log_dir, "metadata.json")
-        if os.path.exists(d):
+        if self.n_epochs != 0 and len(self.rewards) == 0:
             return
 
+        d = os.path.join(self.log_dir, "metadata.json")
         data = {
             "rewards": self.rewards,
             "losses": self.losses,
@@ -482,7 +477,7 @@ class Trainer:
     def save_and_close(self):
         """Saves and closes the environment"""
 
-        self.save()
+        self.log()
         self.close()
 
     def training_loop(

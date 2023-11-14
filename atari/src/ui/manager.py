@@ -47,12 +47,4 @@ Builder.load_string(KV)
 
 
 class Manager(ScreenManager):
-    def check_if_trained(self, data: GameDict) -> bool:
-        directory = "./models"
-        all_folders = [
-            name
-            for name in os.listdir(directory)
-            if os.path.isdir(os.path.join(directory, name))
-        ]
-        env_slug = f"log_{data['slug']}"
-        return env_slug in all_folders
+    pass

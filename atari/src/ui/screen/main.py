@@ -18,6 +18,16 @@ KV = """
     MDTabs:
         ChooseGameTab:
             on_begin_training: root.dispatch("on_begin_training", *args)
+
+    MDAnchorLayout:
+        anchor_x: "right"
+        anchor_y: "top"
+        padding: 0, 10
+
+        MDFillRoundFlatIconButton:
+            icon: "cog"
+            text: "Settings"
+            on_press: app.open_settings()
 """
 
 Builder.load_string(KV)

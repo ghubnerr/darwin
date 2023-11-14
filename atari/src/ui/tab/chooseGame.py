@@ -1,3 +1,5 @@
+import os
+
 from kivy.lang import Builder
 from kivymd.app import MDApp
 from kivymd.uix.button import MDFlatButton
@@ -73,3 +75,13 @@ class ChooseGameTab(Tab, Util):
             self.dialog.dismiss()
             self.dialog = None
             self.dispatch("on_begin_training", data)
+
+    def check_if_trained(self, data: GameDict) -> bool:
+        directory = "./models"
+        all_folders = [
+            name
+            for name in os.listdir(directory)
+            if os.path.isdir(os.path.join(directory, name))
+        ]
+        env_slug = f"log_{data['slug']}"
+        return env_slug in all_folders
