@@ -2,7 +2,7 @@ from typing import List
 
 from kivy.clock import Clock
 from kivy.lang import Builder
-from kivy.properties import StringProperty
+from kivy.properties import DictProperty, StringProperty
 from kivy_garden.graph import Graph, Plot, SmoothLinePlot
 from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import MDScreen
@@ -23,8 +23,17 @@ KV = """
         MDRectangleFlatIconButton:
             icon: "cancel"
             text: "Cancel Training"
-            pos_hint: {"center_x": 0.5}
+            pos_hint: {"center_x": 0.8}
             on_press: root.stop_training()
+
+        MDLabel:
+            font_size: "40sp"
+            id: title
+            text: f"[b]{root.title}[/b]"
+            markup: True
+            pos_hint: {"center_x": 0.5}
+            size_hint_y: 0.3
+            halign: "center"
 
         MDLabel:
             font_size: "30sp"
@@ -32,13 +41,16 @@ KV = """
             text: root.training_text
             markup: True
             pos_hint: {"center_x": 0.5}
-            size_hint_y: 0.5
+            size_hint_y: 0.25
+            halign: "center"
 """
 Builder.load_string(KV)
 
 
 class TrainingScreen(MDScreen, Util):
     training_text = StringProperty("")
+    data: GameDict = None
+    title = StringProperty("")
 
     trainer: ThreadedTrainer
     training: bool = False
@@ -94,6 +106,9 @@ class TrainingScreen(MDScreen, Util):
         # If it is already training, ignore!
         if self.training:
             return
+
+        self.data = data
+        self.title = data["name"]
 
         self.trainer = ThreadedTrainer(
             data,
