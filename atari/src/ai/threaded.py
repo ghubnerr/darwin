@@ -1,10 +1,12 @@
 import threading
 import time
 from datetime import timedelta
-from typing import Callable
+from itertools import count
+from typing import Callable, List
 
 from IPython.core.magics.execution import _format_time
 from src.ai.trainer import Trainer
+from src.gameList import GameDict
 from ui.settings import get_setting
 
 
@@ -31,8 +33,8 @@ class ThreadedTrainer(StoppableThread):
 
     def __init__(
         self,
-        env_name: str,
-        on_epoch: Callable[[float, float], None],
+        game: GameDict,
+        on_epoch: Callable[[List[float], List[float], List[float], int], None],
         on_update: Callable[[str], None],
         on_done: Callable[[], None],
         *args,
@@ -58,28 +60,36 @@ class ThreadedTrainer(StoppableThread):
         }
 
         self.trainer = Trainer(
-            env_name,
+            game,
             *args,
             **trainer_args,
             **kwargs,
         )
 
     def run(self):
-        if self.stopped():
-            self.on_end()
+        if self.check_stopped():
+            return
 
         self.on_update("Warming up")
+        for _epoch in count():
+            self.trainer.warm_up_epoch()
+
+            if self.check_stopped():
+                return
+
+            if self.trainer.finished_warmup():
+                break
+
         self.trainer.warm_up()
         self.on_update("Warm up done... Starting training")
 
-        if self.stopped():
-            self.on_end()
+        if self.check_stopped():
+            return
 
         start_time = time.monotonic()
         for n_epoch in range(self.trainer.epochs):
-            if self.stopped():
-                self.on_end()
-                break
+            if self.check_stopped():
+                return
 
             total_reward, total_loss = self.trainer.epoch()
             end_time = time.monotonic()
@@ -89,11 +99,24 @@ class ThreadedTrainer(StoppableThread):
                 f"Epoch #{n_epoch} -> R:[b]{total_reward:.2f}[/b] L:[b]{total_loss:.2f}[/b] T:{_format_time(delta.microseconds / 100_000)}"
             )
 
-            self.on_epoch(total_reward, total_loss)
+            self.on_epoch(
+                self.trainer.rewards,
+                self.trainer.losses,
+                self.trainer.avg_rewards,
+                self.trainer.n_epochs,
+            )
             start_time = time.monotonic()
 
         self.trainer.save_and_close()
         self.on_done()
+
+    def check_stopped(self):
+        if self.stopped():
+            self.on_end()
+
+            return True
+
+        return False
 
     def on_end(self):
         self.on_update("Stopping training")

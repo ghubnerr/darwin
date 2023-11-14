@@ -1,7 +1,9 @@
+import json
 import math
 import os
 import random
 from collections import deque
+from datetime import datetime
 from itertools import count
 from typing import List, Tuple
 
@@ -16,9 +18,12 @@ from shortuuid import uuid
 from src.ai.model import DQN, DuelDQN
 from src.ai.utils import ReplayMemory, Transition, VideoRecorder
 from src.ai.wrapper import AtariWrapper
+from src.gameList import GameDict
 from torch import optim
 
 obs_type = npt.NDArray[npt.Shape["84, 84"], npt.Number]
+
+AVG_OVER = 25
 
 
 class Trainer:
@@ -30,6 +35,7 @@ class Trainer:
     MEMORY_SIZE = 50_000
 
     steps_done = 0
+    warmupstep = 0
     n_epochs = 0
     eps_threshold = EPS_START
 
@@ -46,9 +52,19 @@ class Trainer:
     video: VideoRecorder
     obs: obs_type
 
+    rewards: List[float] = []
+    losses: List[float] = []
+
+    reward_queue = deque(maxlen=AVG_OVER)
+    losses_queue = deque(maxlen=AVG_OVER)
+
+    avg_rewards: List[float] = []
+    avg_losses: List[float] = []
+    saved = False
+
     def __init__(
         self,
-        env_name: str,
+        game: GameDict,
         model="dqn",
         device="cpu",
         lr=2.5e-4,
@@ -62,7 +78,8 @@ class Trainer:
         data_path="./data",
         **kwargs: float,
     ) -> None:
-        self.env_name = env_name
+        self.game = game
+        self.env_name = game["env"]
         self.model = model
         self.device = device
         self.lr = lr
@@ -77,7 +94,7 @@ class Trainer:
         for k, v in kwargs.items():
             setattr(self, k.upper(), v)
 
-        self.env = gym.make(env_name)
+        self.env = gym.make(self.env_name)
         self.spec = self.env.spec
         default_max_timesteps = (
             self.spec.max_episode_steps
@@ -101,7 +118,7 @@ class Trainer:
             methodname = model
 
         self.uuid = uuid()[:10]
-        self.id = f"{env_name.split('/')[-1]}-{methodname}-{self.uuid}"
+        self.id = f"{self.env_name.split('/')[-1]}-{methodname}-{self.uuid}"
 
         self.log_dir = os.path.join(self.data_path, self.id)
 
@@ -141,48 +158,56 @@ class Trainer:
         if self.logging:
             print("Warming up...")
 
-        warmupstep = 0
         for _epoch in count():
-            self.obs, _info = self.env.reset()  # (84,84)
-            self.obs = torch.from_numpy(self.obs).to(self.device)  # type: ignore # (84,84)
-            # stack four frames together, hoping to learn temporal info
-            self.obs = torch.stack((self.obs, self.obs, self.obs, self.obs)).unsqueeze(
-                0
-            )  # type: ignore # (1,4,84,84)
+            self.warm_up_epoch()
 
-            # step loop
-            for _step in count():
-                warmupstep += 1
-                # take one step
-                action = torch.tensor([[self.env.action_space.sample()]]).to(
-                    self.device
-                )
-                next_obs, reward, terminated, truncated, _info = self.env.step(
-                    action.item()  # type: ignore
-                )
-                done = terminated or truncated
-
-                # convert to tensor
-                reward = torch.tensor([reward], device=self.device)  # (1)
-                done = torch.tensor([done], device=self.device)  # (1)
-                next_obs = torch.from_numpy(next_obs).to(self.device)  # (84,84)
-                next_obs = torch.stack(
-                    (next_obs, self.obs[0][0], self.obs[0][1], self.obs[0][2])
-                ).unsqueeze(
-                    0
-                )  # (1,4,84,84)
-
-                # store the transition in memory
-                self.memory.push(self.obs, action, next_obs, reward, done)
-
-                # move to next state
-                self.obs = next_obs  # type: ignore
-
-                if done:
-                    break
-
-            if warmupstep > self.WARMUP:
+            if self.finished_warmup():
                 break
+
+    def finished_warmup(self) -> bool:
+        return self.warmupstep > self.WARMUP
+
+    def warm_up_epoch(self):
+        self.obs, _info = self.env.reset()  # (84,84)
+        self.obs = torch.from_numpy(self.obs).to(self.device)  # type: ignore # (84,84)
+        # stack four frames together, hoping to learn temporal info
+        self.obs = torch.stack((self.obs, self.obs, self.obs, self.obs)).unsqueeze(
+            0
+        )  # type: ignore # (1,4,84,84)
+
+        for _step in count():
+            done = self.warm_up_step()
+
+            if done:
+                break
+
+    def warm_up_step(self):
+        # take one step
+        action = torch.tensor([[self.env.action_space.sample()]]).to(self.device)
+        next_obs, reward, terminated, truncated, _info = self.env.step(
+            action.item()  # type: ignore
+        )
+        done = terminated or truncated
+
+        # convert to tensor
+        reward = torch.tensor([reward], device=self.device)  # (1)
+        done = torch.tensor([done], device=self.device)  # (1)
+        next_obs = torch.from_numpy(next_obs).to(self.device)  # (84,84)
+        next_obs = torch.stack(
+            (next_obs, self.obs[0][0], self.obs[0][1], self.obs[0][2])
+        ).unsqueeze(
+            0
+        )  # (1,4,84,84)
+
+        # store the transition in memory
+        self.memory.push(self.obs, action, next_obs, reward, done)
+
+        # move to next state
+        self.obs = next_obs  # type: ignore
+
+        self.warmupstep += 1
+
+        return done
 
     def epoch(self) -> Tuple[float, float]:
         """Does one epoch of training
@@ -206,6 +231,19 @@ class Trainer:
             total_loss += loss
 
         self.n_epochs += 1
+
+        self.rewards.append(total_reward)
+        self.losses.append(total_loss)
+
+        self.reward_queue.append(total_reward)
+        self.losses_queue.append(total_loss)
+
+        avg_reward = sum(self.reward_queue) / len(self.reward_queue)
+        avg_loss = sum(self.losses_queue) / len(self.losses_queue)
+
+        self.avg_rewards.append(avg_reward)
+        self.avg_losses.append(avg_loss)
+
         return total_reward, total_loss
 
     def step(
@@ -355,17 +393,52 @@ class Trainer:
     def save(self, dir: str | None = None) -> bool:
         """Saves the model and other data to a file
 
-        Returns if the save was successful
+        Returns if the saved
         """
+        # Prevents saving multiple times
+        if self.saved:
+            return True
+
         dir = dir if dir is not None else self.model_dir
+
         try:
             torch.save(
                 self.policy_net,
                 os.path.join(dir, f"{self.n_epochs}.pth"),
             )
+
+            self.save_metadata()
+
+            self.saved = True
             return True
         except:
+            self.saved = False
             return False
+
+    def save_metadata(self):
+        d = os.path.join(self.log_dir, "metadata.json")
+        if os.path.exists(d):
+            return
+
+        data = {
+            "rewards": self.rewards,
+            "losses": self.losses,
+            "avg_rewards": self.avg_rewards,
+            "avg_losses": self.avg_losses,
+            "id": self.id,
+            "env": self.env_name,
+            "lr": self.lr,
+            "epochs": self.epochs,
+            "batch_size": self.batch_size,
+            "use_ddqn": self.use_ddqn,
+            "eval_freq": self.eval_freq,
+            "device": self.device,
+            "epochs": self.epochs,
+            "steps": self.n_epochs,
+            "created": datetime.now().isoformat(),
+        }
+
+        json.dump(data, open(d, "w"))
 
     def select_action(self, state: T.Tensor) -> T.Tensor:
         """

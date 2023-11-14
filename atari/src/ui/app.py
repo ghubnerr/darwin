@@ -46,6 +46,7 @@ KV = """
 #                 icon: "robot-excited"
     # Manager:
 Manager:
+    id: manager
 
 """
 
