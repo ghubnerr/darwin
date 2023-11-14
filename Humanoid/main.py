@@ -45,7 +45,7 @@ def train():
     plt.show()
 
 def load_trained():
-    env = gym.make('Humanoid-v4', ctrl_cost_weight=0.1,reset_noise_scale=0.1, exclude_current_positions_from_observation=True, render_mode="human", terminate_when_unhealthy=False)
+    env = gym.make('Humanoid-v4', ctrl_cost_weight=0.1,reset_noise_scale=0.1, exclude_current_positions_from_observation=True, render_mode="human", terminate_when_unhealthy=True)
 
 
     agent = Agent(alpha=0.000025, beta=0.00025, input_dims=[input_dims_gv], tau=0.001, env=env, batch_size=64, layer1_size=400, layer2_size=300, n_actions=num_actions_gv)
