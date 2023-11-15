@@ -9,6 +9,7 @@ from src.ui.settings import get_setting
 
 
 class Game(TypedDict):
+    name: str
     rewards: List[float]
     losses: List[float]
     avg_rewards: List[float]
@@ -17,6 +18,7 @@ class Game(TypedDict):
     env: str
     lr: float
     epochs: int
+    steps: int
     batch_size: int
     use_ddqn: bool
     eval_freq: int
@@ -29,8 +31,12 @@ class Game(TypedDict):
 
 def load_trained() -> Iterable[Game]:
     data_path: str = get_setting("data_path")  # type: ignore
-
     games: List[Game] = []
+
+    # If the dir is empty, return an empty list
+    if not os.path.exists(data_path):
+        return games
+
     for dir in os.listdir(data_path):
         d = path.join(data_path, dir)
 

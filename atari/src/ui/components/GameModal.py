@@ -1,11 +1,9 @@
 import webbrowser
 
+from gameList import GameDict
 from kivy.lang import Builder
 from kivy.properties import StringProperty
 from kivymd.uix.boxlayout import MDBoxLayout
-
-from gameList import GameDict
-from ui.game import Game
 
 KV = """
 <GameModal>:

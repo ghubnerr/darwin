@@ -1,17 +1,17 @@
-import os
+from typing import List
 
 from kivy.lang import Builder
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
-from src.gameList import GameDict, gameList
-from src.ui.components import Game, GameModal
+from src.load_trained import Game, load_trained
+from src.ui.components import LoadGame, LoadGameModal
 from src.ui.tab.util import Tab
-from src.ui.util import Util, events
+from src.ui.util import Util
 
 KV = """
-<ChooseGameTab>:
-    title: "Training"
-    content_text: "Train the Ai"
+<LoadTrainedTab>:
+    title: "Load Trained"
+    content_text: "Load the already trained AI"
 
     MDScrollView:
         MDGridLayout:
@@ -29,19 +29,19 @@ KV = """
 Builder.load_string(KV)
 
 
-@events("begin_training")
-class ChooseGameTab(Tab, Util):
-    dialog: MDDialog = None
+class LoadTrainedTab(Tab, Util):
+    trained: List[Game]
 
     def post_init(self, *_, **__):
+        self.trained = load_trained()
         grid = self.ids["images_grid"]
 
-        for game in gameList.values():
-            g = Game(game, on_press=self.on_game_press)
+        for game in self.trained:
+            g = LoadGame(game, on_press=self.on_game_press)
             g.on_press = self.on_game_press
             grid.add_widget(g)
 
-    def on_game_press(self, data: GameDict, *_, **__):
+    def on_game_press(self, data: Game, *_, **__):
         if self.dialog:
             self.dialog.dismiss()
             self.dialog = None
@@ -50,7 +50,7 @@ class ChooseGameTab(Tab, Util):
             title=data["name"],
             height="500dp",
             type="custom",
-            content_cls=GameModal(data),
+            content_cls=LoadGameModal(data),
             buttons=[
                 MDFlatButton(
                     text="Cancel",
@@ -67,19 +67,3 @@ class ChooseGameTab(Tab, Util):
             ],
         )
         self.dialog.open()
-
-    def start_training(self, data):
-        if self.dialog:
-            self.dialog.dismiss()
-            self.dialog = None
-            self.dispatch("on_begin_training", data)
-
-    def check_if_trained(self, data: GameDict) -> bool:
-        directory = "./models"
-        all_folders = [
-            name
-            for name in os.listdir(directory)
-            if os.path.isdir(os.path.join(directory, name))
-        ]
-        env_slug = f"log_{data['slug']}"
-        return env_slug in all_folders

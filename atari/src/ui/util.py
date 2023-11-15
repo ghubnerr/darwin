@@ -1,6 +1,7 @@
 from typing import Callable, Iterable
 
 from kivy.clock import Clock
+from kivy.lang import Builder
 from kivy.uix.widget import Widget
 from kivymd.app import MDApp
 
@@ -66,3 +67,7 @@ def kivy_callback(func: Callable):
         return func(args[0], args[-1], *args, **kwargs)
 
     return inner
+
+
+def load_kv(s: str) -> None:
+    Builder.load_string(s)

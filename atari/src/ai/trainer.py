@@ -32,7 +32,7 @@ class Trainer:
     EPS_END = 0.05
     EPS_DECAY = 50000
     WARMUP = 1000  # don't update net until WARMUP steps
-    MEMORY_SIZE = 50_000
+    MEMORY_SIZE = 30_000
 
     steps_done = 0
     warmupstep = 0
@@ -420,15 +420,16 @@ class Trainer:
             "losses": self.losses,
             "avg_rewards": self.avg_rewards,
             "avg_losses": self.avg_losses,
+            "name": self.game["name"],
             "id": self.id,
             "env": self.env_name,
             "lr": self.lr,
-            "epochs": self.epochs,
+            "steps": self.steps_done,
             "batch_size": self.batch_size,
             "use_ddqn": self.use_ddqn,
             "eval_freq": self.eval_freq,
             "device": self.device,
-            "epochs": self.epochs,
+            "epochs": self.n_epochs,
             "steps": self.n_epochs,
             "created": datetime.now().isoformat(),
         }

@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from typing import Iterable, List, TypedDict
 
+import src.ui.components
 import src.ui.screen.main
 import src.ui.screen.training
 from kivy.clock import Clock
@@ -21,8 +22,6 @@ from kivymd.uix.tab import MDTabsBase
 from src.ai.threaded import ThreadedTrainer
 from src.gameList import GameDict, gameList
 from src.load_trained import load_trained
-from src.ui.game import Game
-from src.ui.gameModal import GameModal
 
 
 class Tab(MDFloatLayout, MDTabsBase):
