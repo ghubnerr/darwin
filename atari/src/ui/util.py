@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 from inspect import Parameter, signature
 from typing import Callable
@@ -5,6 +6,8 @@ from typing import Callable
 from kivy.clock import Clock
 from kivy.lang import Builder
 from kivymd.app import MDApp
+from src.load_trained import TrainedGame
+from src.ui.settings import get_setting
 
 
 def go_to_screen(name: str):
@@ -70,7 +73,7 @@ def bind(instance, func, as_name=None):
 
 def kivy_callback(func: Callable):
     def inner(*args, **kwargs):
-        return func(args[0], args[-1], *args, **kwargs)
+        return func(args[0], args[-1])
 
     return inner
 

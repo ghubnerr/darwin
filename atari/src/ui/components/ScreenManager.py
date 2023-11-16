@@ -19,12 +19,15 @@ KV = """
             root.current = "progress"
             training.begin_training(*args)
         on_load_game:
-            root.current = ""
+            root.current = "trained"
+            trained.load_trained(*args)
 
 
     TrainingScreen:
         id: training
 
+    LoadTrained:
+        id: trained
 """
 
 Builder.load_string(KV)

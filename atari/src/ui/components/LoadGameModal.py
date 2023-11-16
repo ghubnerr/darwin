@@ -7,7 +7,7 @@ from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
-from src.load_trained import Game
+from src.load_trained import TrainedGame
 from src.ui.settings import get_setting
 
 from .Link import Link
@@ -65,7 +65,7 @@ class LoadGameModalContent(MDBoxLayout):
         "device",
     ]
 
-    def __init__(self, data: Game, **kwargs):
+    def __init__(self, data: TrainedGame, **kwargs):
         self.data = data
 
         self.prop = "Trained with: \n" + " \n".join(
@@ -82,7 +82,9 @@ class LoadGameModalContent(MDBoxLayout):
 
 
 class LoadGameModal(MDDialog):
-    def __init__(self, data: Game, start_training: Callable[[Game], None], **kwargs):
+    def __init__(
+        self, data: TrainedGame, start_training: Callable[[TrainedGame], None], **kwargs
+    ):
         self.data = data
         self.start_training = start_training
         self.app = MDApp.get_running_app()

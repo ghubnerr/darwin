@@ -227,15 +227,6 @@ class SusSmartTile(MDRelativeLayout, ThemableBehavior):
     def on_press(self, *args):
         """Called when the button is pressed."""
 
-    def add_widget(self, widget, *args, **kwargs):
-        if isinstance(widget, (AtariImage, AtariOverlayBox)):
-            return super().add_widget(widget, *args, **kwargs)
-        else:
-            if isinstance(widget, MDLabel):
-                widget.shorten = True
-                widget.shorten_from = "right"
-            self.ids.box.add_widget(widget)
-
 
 class AtariImage(RectangularRippleBehavior, ButtonBehavior, Image):
     """Implements the tile image."""

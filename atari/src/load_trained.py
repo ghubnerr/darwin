@@ -1,5 +1,6 @@
 import json
 import os
+from curses import meta
 from datetime import datetime
 from os import path
 from typing import Iterable, List, Tuple, TypedDict
@@ -9,7 +10,8 @@ from src.gameList import GameDict
 from src.ui.settings import get_setting
 
 
-class Game(GameDict):
+class TrainedGame(GameDict):
+    path: str
     name: str
     rewards: List[float]
     losses: List[float]
@@ -42,9 +44,9 @@ def date_hook(json_dict):
     return json_dict
 
 
-def load_trained() -> Iterable[Game]:
-    data_path: str = get_setting("data_path")  # type: ignore
-    games: List[Game] = []
+def load_trained() -> Iterable[TrainedGame]:
+    data_path: str = os.path.abspath(get_setting("data_path"))  # type: ignore
+    games: List[TrainedGame] = []
 
     # If the dir is empty, return an empty list
     if not os.path.exists(data_path):
@@ -62,7 +64,10 @@ def load_trained() -> Iterable[Game]:
         if not os.path.exists(metadata_path):
             continue
 
-        metadata: Game = json.loads(open(metadata_path).read(), object_hook=date_hook)
+        metadata: TrainedGame = json.loads(
+            open(metadata_path).read(), object_hook=date_hook
+        )
+        metadata["path"] = d
 
         videos = tuple(path.abspath(p) for p in os.listdir(path.join(d, "videos")))
         models = tuple(path.abspath(p) for p in os.listdir(path.join(d, "models")))
@@ -71,5 +76,7 @@ def load_trained() -> Iterable[Game]:
         metadata["models"] = models  # type: ignore
 
         games.append(metadata)
+
+    games = list(sorted(games, key=lambda g: g["created"], reverse=True))
 
     return games

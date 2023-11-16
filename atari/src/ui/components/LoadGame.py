@@ -1,7 +1,7 @@
 from humanize import naturaldate
 from kivy.lang import Builder
 from kivy.properties import StringProperty
-from src.load_trained import Game
+from src.load_trained import TrainedGame
 from src.ui.components.Game import SusSmartTile
 
 KV = """
@@ -54,9 +54,9 @@ class LoadGame(SusSmartTile):
     created = StringProperty("")
     epochs = StringProperty("")
     # properties = StringProperty("")
-    data: Game
+    data: TrainedGame
 
-    def __init__(self, data: Game, *args, **kwargs):
+    def __init__(self, data: TrainedGame, *args, **kwargs):
         self.data = data
 
         self.name = data["name"]

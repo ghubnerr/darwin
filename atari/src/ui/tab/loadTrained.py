@@ -3,7 +3,7 @@ from typing import List
 from kivy.lang import Builder
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
-from src.load_trained import Game, load_trained
+from src.load_trained import TrainedGame, load_trained
 from src.ui.components import LoadGame, LoadGameModal
 from src.ui.tab.util import Tab
 from src.ui.util import Util, events
@@ -32,7 +32,7 @@ Builder.load_string(KV)
 @events("load_game")
 class LoadTrainedTab(Tab, Util):
     dialog: MDDialog = None
-    trained: List[Game]
+    trained: List[TrainedGame]
 
     def post_init(self, *_, **__):
         self.trained = load_trained()
@@ -43,7 +43,7 @@ class LoadTrainedTab(Tab, Util):
             g.on_press = self.on_game_press
             grid.add_widget(g)
 
-    def on_game_press(self, data: Game, *_, **__):
+    def on_game_press(self, data: TrainedGame, *_, **__):
         if self.dialog:
             self.dialog.dismiss()
             self.dialog = None
