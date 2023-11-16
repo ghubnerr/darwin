@@ -11,6 +11,7 @@ KV = """
         ChooseGameTab:
             on_begin_training: root.dispatch("on_begin_training", *args)
         LoadTrainedTab:
+            on_load_game: root.dispatch("on_load_game", *args)
 
     MDAnchorLayout:
         anchor_x: "right"
@@ -26,6 +27,6 @@ KV = """
 Builder.load_string(KV)
 
 
-@events("begin_training")
+@events("begin_training", "load_game")
 class MainScreen(MDScreen):
     pass

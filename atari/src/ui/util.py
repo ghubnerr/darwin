@@ -1,8 +1,9 @@
-from typing import Callable, Iterable
+from functools import wraps
+from inspect import Parameter, signature
+from typing import Callable
 
 from kivy.clock import Clock
 from kivy.lang import Builder
-from kivy.uix.widget import Widget
 from kivymd.app import MDApp
 
 
@@ -27,13 +28,18 @@ class Util(object):
 
 
 def events(*events: str):
+    """Class decorator which takes in a list of events to register as `on_{name}`
+
+    By default the event will bubble up to the main class
+    """
+
     def inner(cls: object):
         orig_init = cls.__init__
         # Make copy of original __init__, so we can call it without recursion
 
         def __init__(self, *args, **kws):
             def event_handler(self, *_, **__):
-                pass
+                return False
 
             for event in events:
                 bind(self, event_handler, as_name=f"on_{event}")
@@ -71,3 +77,27 @@ def kivy_callback(func: Callable):
 
 def load_kv(s: str) -> None:
     Builder.load_string(s)
+
+
+def instance_variables(f):
+    sig = signature(f)
+
+    @wraps(f)
+    def wrapper(self, *args, **kwargs):
+        values = sig.bind(self, *args, **kwargs)
+        for k, p in sig.parameters.items():
+            if k != "self":
+                if k in values.arguments:
+                    val = values.arguments[k]
+                    if p.kind in (
+                        Parameter.POSITIONAL_OR_KEYWORD,
+                        Parameter.KEYWORD_ONLY,
+                    ):
+                        setattr(self, k, val)
+                    elif p.kind == Parameter.VAR_KEYWORD:
+                        for k, v in values.arguments[k].items():
+                            setattr(self, k, v)
+                else:
+                    setattr(self, k, p.default)
+
+    return wrapper

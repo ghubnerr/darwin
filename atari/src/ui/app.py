@@ -1,7 +1,6 @@
-import json
 from json import dumps, loads
 
-import ui.manager
+import src.ui.components
 from kivy.lang import Builder
 from kivy.uix.settings import SettingsWithSidebar
 from kivymd.app import MDApp

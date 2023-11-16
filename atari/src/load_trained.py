@@ -5,10 +5,11 @@ from os import path
 from typing import Iterable, List, Tuple, TypedDict
 
 from kivymd.app import MDApp
+from src.gameList import GameDict
 from src.ui.settings import get_setting
 
 
-class Game(TypedDict):
+class Game(GameDict):
     name: str
     rewards: List[float]
     losses: List[float]
@@ -27,6 +28,18 @@ class Game(TypedDict):
     created: datetime
     models: Tuple[str]
     videos: Tuple[str]
+
+
+def date_hook(json_dict):
+    for key, value in json_dict.items():
+        if not isinstance(value, str):
+            continue
+
+        try:
+            json_dict[key] = datetime.fromisoformat(value)
+        except:
+            pass
+    return json_dict
 
 
 def load_trained() -> Iterable[Game]:
@@ -49,7 +62,7 @@ def load_trained() -> Iterable[Game]:
         if not os.path.exists(metadata_path):
             continue
 
-        metadata: Game = json.loads(open(metadata_path).read())
+        metadata: Game = json.loads(open(metadata_path).read(), object_hook=date_hook)
 
         videos = tuple(path.abspath(p) for p in os.listdir(path.join(d, "videos")))
         models = tuple(path.abspath(p) for p in os.listdir(path.join(d, "models")))

@@ -5,6 +5,8 @@ from collections import deque, namedtuple
 import cv2
 import imageio
 import numpy as np
+from matplotlib import figure
+import io
 
 
 def process_image(

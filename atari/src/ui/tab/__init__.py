@@ -1,2 +1,2 @@
-from .chooseGame import ChooseGameTab
-from .loadTrained import LoadTrainedTab
+from .ChooseGame import ChooseGameTab
+from .LoadTrained import LoadTrainedTab

@@ -6,7 +6,7 @@ from kivymd.uix.dialog import MDDialog
 from src.load_trained import Game, load_trained
 from src.ui.components import LoadGame, LoadGameModal
 from src.ui.tab.util import Tab
-from src.ui.util import Util
+from src.ui.util import Util, events
 
 KV = """
 <LoadTrainedTab>:
@@ -29,7 +29,9 @@ KV = """
 Builder.load_string(KV)
 
 
+@events("load_game")
 class LoadTrainedTab(Tab, Util):
+    dialog: MDDialog = None
     trained: List[Game]
 
     def post_init(self, *_, **__):
@@ -46,24 +48,10 @@ class LoadTrainedTab(Tab, Util):
             self.dialog.dismiss()
             self.dialog = None
 
-        self.dialog = MDDialog(
-            title=data["name"],
-            height="500dp",
-            type="custom",
-            content_cls=LoadGameModal(data),
-            buttons=[
-                MDFlatButton(
-                    text="Cancel",
-                    theme_text_color="Custom",
-                    text_color=self.app.theme_cls.secondary_text_color,
-                    on_press=lambda *_, **__: self.dialog.dismiss(),
-                ),
-                MDFlatButton(
-                    text="Start Training",
-                    theme_text_color="Custom",
-                    text_color=self.app.theme_cls.primary_color,
-                    on_press=lambda *_, **__: self.start_training(data),
-                ),
-            ],
-        )
+        self.dialog = LoadGameModal(data, self.start_training)
         self.dialog.open()
+
+    def start_training(self, data):
+        if self.dialog:
+            self.dialog = None
+            self.dispatch("on_load_game", data)

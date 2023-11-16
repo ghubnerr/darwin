@@ -7,9 +7,16 @@ from datetime import datetime
 from itertools import count
 from typing import List, Tuple
 
+import matplotlib as mpl
+
+backend_ = mpl.get_backend()
+mpl.use("Agg")  # Prevent showing stuff
+
 import gymnasium as gym
 import matplotlib.pyplot as plt
 import nptyping as npt
+import pandas as pd
+import seaborn as sns
 import torch
 import torch as T
 import torch.nn as nn
@@ -398,6 +405,9 @@ class Trainer:
 
         dir = dir if dir is not None else self.model_dir
 
+        if self.n_epochs != 0 and len(self.rewards) == 0:
+            return
+
         try:
             torch.save(
                 self.policy_net,
@@ -405,22 +415,19 @@ class Trainer:
             )
 
             self.save_metadata()
+            self.save_graph()
 
             return True
-        except:
+        except Exception as e:
             return False
 
     def save_metadata(self):
-        if self.n_epochs != 0 and len(self.rewards) == 0:
-            return
-
         d = os.path.join(self.log_dir, "metadata.json")
         data = {
             "rewards": self.rewards,
             "losses": self.losses,
             "avg_rewards": self.avg_rewards,
             "avg_losses": self.avg_losses,
-            "name": self.game["name"],
             "id": self.id,
             "env": self.env_name,
             "lr": self.lr,
@@ -432,9 +439,34 @@ class Trainer:
             "epochs": self.n_epochs,
             "steps": self.n_epochs,
             "created": datetime.now().isoformat(),
+            **self.game,
         }
 
-        json.dump(data, open(d, "w"))
+        json.dump(data, open(d, "w"), indent=2)
+
+    def save_graph(self):
+        if len(self.rewards) == 0:
+            return
+
+        d = os.path.join(self.log_dir, "performance.png")
+        data = []
+        for i, (r, l, ar, al) in enumerate(
+            zip(self.rewards, self.losses, self.avg_rewards, self.avg_losses)
+        ):
+            data += [(i, "Reward", r)]
+            data += [(i, "Loss", l)]
+            data += [(i, "Avg Reward", ar)]
+            data += [(i, "Avg Loss", al)]
+
+        frame = pd.DataFrame(
+            data=data,
+            columns=["epoch", "type", "value"],
+        )
+
+        sns.set_theme(style="darkgrid")
+        sns.lineplot(data=frame, x="epoch", y="value", hue="type")
+        plt.savefig(d)
+        plt.close()
 
     def select_action(self, state: T.Tensor) -> T.Tensor:
         """

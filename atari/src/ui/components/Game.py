@@ -19,7 +19,6 @@ from kivymd.uix.fitimage import FitImage
 from kivymd.uix.imagelist import MDSmartTile
 from kivymd.uix.label import MDLabel
 from kivymd.uix.relativelayout import MDRelativeLayout
-
 from src.gameList import GameDict
 
 KV = """

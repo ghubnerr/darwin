@@ -1,6 +1,6 @@
 from humanize import naturaldate
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import StringProperty
 from src.load_trained import Game
 from src.ui.components.Game import SusSmartTile
 
@@ -40,7 +40,7 @@ KV = """
             (0, root.height - self.height)
 
         MDLabel:
-            text: root.description
+            text: f"{root.name} - {root.epochs} Created: {root.created}"
 
             bold: True
             color: 1, 1, 1, 1
@@ -51,33 +51,21 @@ Builder.load_string(KV)
 
 class LoadGame(SusSmartTile):
     name = StringProperty("")
-    game_id = StringProperty("")
     created = StringProperty("")
-    id = StringProperty("")
-    properties = StringProperty("")
-
-    data = ObjectProperty()
-
-    INCLUDED_PROPERTIES = [
-        "lr",
-        "epochs",
-        "batch_size",
-        "use-ddqn",
-        "eval_freq",
-        "device",
-        "steps",
-    ]
+    epochs = StringProperty("")
+    # properties = StringProperty("")
+    data: Game
 
     def __init__(self, data: Game, *args, **kwargs):
         self.data = data
 
         self.name = data["name"]
-        self.game_id = data["game_id"]
-        self.id = data["id"]
+        self.epochs = str(data["epochs"])
         self.created = naturaldate(data["created"])
-        self.properties = " \n".join(
-            [f"{s.capitalize()}: {data[s]}" for s in self.INCLUDED_PROPERTIES]
-        )
+
+        # self.properties = " \n".join(
+        #     [f"{s.capitalize()}: {data[s]}" for s in self.INCLUDED_PROPERTIES]
+        # )
 
         self.source = f"src/assets/atari/{self.data['slug']}.gif.png"
 
