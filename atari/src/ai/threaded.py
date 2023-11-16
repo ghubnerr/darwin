@@ -1,13 +1,18 @@
 import threading
 import time
+from contextlib import nullcontext
 from datetime import timedelta
 from itertools import count
 from typing import Callable, List
 
+import torch as T
 from IPython.core.magics.execution import _format_time
-from src.ai.trainer import Trainer
+from src.ai.trainer import Trainer, obs_type
 from src.gameList import GameDict
+from src.ui.util import the_void
 from ui.settings import get_setting
+
+from .utils import VideoRecorder
 
 
 class StoppableThread(threading.Thread):
@@ -56,7 +61,6 @@ class ThreadedTrainer(StoppableThread):
             "max_timesteps": get_setting("max_timesteps"),
             "max_timesteps_calc": get_setting("max_timesteps_calc"),
             "data_path": get_setting("data_path"),
-            "logging": True,
         }
 
         self.trainer = Trainer(
@@ -80,7 +84,6 @@ class ThreadedTrainer(StoppableThread):
             if self.trainer.finished_warmup():
                 break
 
-        self.trainer.warm_up()
         self.on_update("Warm up done... Starting training")
 
         if self.check_stopped():
@@ -122,3 +125,49 @@ class ThreadedTrainer(StoppableThread):
         self.on_update("Stopping training")
         self.on_done()
         self.trainer.save_and_close()
+
+
+class ThreadedEvaluator(ThreadedTrainer):
+    def __init__(
+        self,
+        game: GameDict,
+        on_frame: Callable[[obs_type], None],
+        trained_model: str,
+        *args,
+        **kwargs,
+    ):
+        self.on_frame = on_frame
+        self.trained_model = trained_model
+
+        super().__init__(
+            game,
+            the_void,
+            the_void,
+            the_void,
+            trained_model=trained_model,
+            video=FrameRecorder(on_frame, "___pain___"),
+            *args,
+            **kwargs,
+        )
+
+    def run(self):
+        if self.check_stopped():
+            return
+
+        with T.no_grad():
+            while True:
+                if self.check_stopped():
+                    return
+
+                self.trainer.eval_epoch()
+
+
+class FrameRecorder(VideoRecorder):
+    def __init__(self, on_frame: Callable[[obs_type], None], *args, **kwargs):
+        self.on_frame = on_frame
+
+        super().__init__(*args, **kwargs)
+
+    def record(self, frame):
+        self.on_frame(frame)
+        return super().record(frame)

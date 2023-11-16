@@ -1,4 +1,5 @@
-from typing import List
+from os import path
+from typing import List, Tuple
 
 from kivy.clock import Clock
 from kivy.lang import Builder
@@ -9,6 +10,8 @@ from kivymd.uix.screen import MDScreen
 from src.ai.threaded import ThreadedTrainer
 from src.gameList import GameDict
 from src.ui.util import Util, events, go_to_screen_callback, kivy_callback
+
+from ...load_trained import TrainedGame
 
 KV = """
 <TrainingScreen>:
@@ -103,7 +106,7 @@ class TrainingScreen(MDScreen, Util):
         self.training_txt_widget = self.ids["training_txt"]
 
     @kivy_callback
-    def begin_training(self, data: GameDict, *args):
+    def begin_training(self, data: GameDict):
         # If it is already training, ignore!
         if self.training:
             return
@@ -115,7 +118,29 @@ class TrainingScreen(MDScreen, Util):
             data,
             on_epoch=self.on_epoch,
             on_done=self.on_done,
+            logging=True,
             on_update=self.on_update,
+        )
+        self.trainer.start()
+        self.training = True
+
+    @kivy_callback
+    def load_trained_at_epoch(self, data: Tuple[TrainedGame, int]):
+        if self.training:
+            return
+
+        self.data, epoch = data
+        self.title = self.data["name"]
+
+        model = path.join(self.data["path"], "models", f"{epoch}.pth")
+
+        self.trainer = ThreadedTrainer(
+            self.data,
+            on_epoch=self.on_epoch,
+            on_done=self.on_done,
+            on_update=self.on_update,
+            logging=False,
+            trained_model=model,
         )
         self.trainer.start()
         self.training = True

@@ -1,3 +1,4 @@
+import io
 import os
 import random
 from collections import deque, namedtuple
@@ -6,7 +7,6 @@ import cv2
 import imageio
 import numpy as np
 from matplotlib import figure
-import io
 
 
 def process_image(
@@ -57,7 +57,7 @@ class ReplayMemory:
 
 
 class VideoRecorder:
-    def __init__(self, dir_name, fps=30):
+    def __init__(self, dir_name, fps=30 // 4):
         self.dir_name = dir_name
         self.fps = fps
         self.frames = []

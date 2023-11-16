@@ -5,7 +5,7 @@ from kivy.lang import Builder
 from kivymd.uix.screen import MDScreen
 from src.load_trained import TrainedGame
 from src.ui.components import LoadTrainedClickable
-from src.ui.util import Util, go_to_screen, kivy_callback
+from src.ui.util import Util, events, go_to_screen, kivy_callback
 
 KV = """
 <LoadTrained>:
@@ -37,10 +37,14 @@ KV = """
 Builder.load_string(KV)
 
 
+@events("load_trained_at_epoch")
 class LoadTrained(MDScreen, Util):
+    data: TrainedGame
+
     @kivy_callback
     def load_trained(self, data: TrainedGame):
         models = self.ids["models"]
+        self.data = data
 
         epochs = [int(path.basename(f).split(".")[0]) for f in data["models"]]
         models.clear_widgets()
@@ -53,7 +57,13 @@ class LoadTrained(MDScreen, Util):
             models.add_widget(clickable)
 
     def on_clickable_press(self, epoch: int):
-        print(epoch)
+        self.dispatch(
+            "on_load_trained_at_epoch",
+            (
+                self.data,
+                epoch,
+            ),
+        )
 
     def go_back(self, *_):
         go_to_screen("main")

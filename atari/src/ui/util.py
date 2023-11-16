@@ -104,3 +104,17 @@ def instance_variables(f):
                     setattr(self, k, p.default)
 
     return wrapper
+
+
+def do_later(f):
+    """Wrapper function that schedules a function to be called on the next frame"""
+
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        Clock.schedule_once(lambda *_: f(*args, **kwargs), 0)
+
+    return wrapper
+
+
+def the_void(*args, **kwargs):
+    pass

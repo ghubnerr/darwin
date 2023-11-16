@@ -20,7 +20,6 @@ import seaborn as sns
 import torch
 import torch as T
 import torch.nn as nn
-from numpy import Infinity
 from shortuuid import uuid
 from src.ai.model import DQN, DuelDQN
 from src.ai.utils import ReplayMemory, Transition, VideoRecorder
@@ -68,6 +67,7 @@ class Trainer:
     avg_rewards: List[float] = []
     avg_losses: List[float] = []
     saved = False
+    eval_mode = False
 
     def __init__(
         self,
@@ -83,6 +83,8 @@ class Trainer:
         max_timesteps_calc="lowest",
         logging=False,
         data_path="./data",
+        trained_model: str | None = None,
+        video: VideoRecorder | None = None,
         **kwargs: float,
     ) -> None:
         self.game = game
@@ -101,7 +103,10 @@ class Trainer:
         for k, v in kwargs.items():
             setattr(self, k.upper(), v)
 
-        self.env = gym.make(self.env_name)
+        self.env = gym.make(
+            self.env_name,
+            render_mode="rgb_array" if trained_model != None else "rgb_array",
+        )
         self.spec = self.env.spec
         default_max_timesteps = (
             self.spec.max_episode_steps
@@ -116,7 +121,11 @@ class Trainer:
         elif max_timesteps_calc == "override":
             self.spec.max_episode_steps = max_timesteps
 
-        self.env = AtariWrapper(self.env, max_episode_steps=self.spec.max_episode_steps)
+        self.env = AtariWrapper(
+            self.env,
+            max_episode_steps=self.spec.max_episode_steps,
+            video=video if video is not None else None,
+        )
         self.n_action = self.env.action_space.n  # type: ignore
 
         if use_ddqn:
@@ -141,7 +150,7 @@ class Trainer:
         if not os.path.exists(self.model_dir):
             os.makedirs(self.model_dir)
 
-        self.video = VideoRecorder(self.video_log_dir)
+        self.video = VideoRecorder(self.video_log_dir) if video is None else video
 
         if model == "dqn":
             self.policy_net = DQN(in_channels=4, n_actions=self.n_action).to(device)
@@ -149,6 +158,12 @@ class Trainer:
         else:
             self.policy_net = DuelDQN(in_channels=4, n_actions=self.n_action).to(device)
             self.target_net = DuelDQN(in_channels=4, n_actions=self.n_action).to(device)
+
+        if trained_model is not None:
+            self.eval_mode = True
+            self.policy_net = torch.load(trained_model)
+            self.policy_net.eval()
+
         # let target model = model
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
@@ -397,6 +412,43 @@ class Trainer:
             self.save()
             print(f"Eval epoch {self.n_epochs}: Reward {evalreward}")
 
+    def eval_epoch(self):
+        self.video.reset()
+
+        self.obs, _info = self.env.reset()  # (84,84)
+        self.obs = torch.from_numpy(self.obs).to(self.device)  # type: ignore # (84,84)
+        # stack four frames together, hoping to learn temporal info
+        self.obs = torch.stack((self.obs, self.obs, self.obs, self.obs)).unsqueeze(0)  # type: ignore # (1,4,84,84)
+
+        for _ in count():
+            action = self.policy_net(self.obs).max(1)[1]
+            (
+                next_obs,
+                _reward,
+                terminated,
+                truncated,
+                info,
+            ) = self.env.step(action.item())
+
+            next_obs = torch.from_numpy(next_obs).to(self.device)  # (84,84)
+            next_obs = torch.stack(
+                (next_obs, self.obs[0][0], self.obs[0][1], self.obs[0][2])
+            ).unsqueeze(
+                0
+            )  # (1,4,84,84)
+            self.obs = next_obs  # type: ignore
+            if terminated or truncated:
+                if info["lives"] == 0 or _ >= self.spec.max_episode_steps:  # real end
+                    break
+                else:
+                    self.obs, info = self.env.reset()  # type: ignore
+                    self.obs = torch.from_numpy(self.obs).to(self.device)  # type: ignore
+                    self.obs = torch.stack(
+                        (self.obs, self.obs, self.obs, self.obs)
+                    ).unsqueeze(
+                        0
+                    )  # type: ignore
+
     def save(self, dir: str | None = None) -> bool:
         """Saves the model and other data to a file
 
@@ -512,61 +564,3 @@ class Trainer:
 
         self.log()
         self.close()
-
-    def training_loop(
-        self,
-    ) -> Tuple[Tuple[List[float], List[float]], Tuple[List[float], List[float]]]:
-        """Runs the full training loop
-
-        Returns (rewardList, lossList), (avgrewardlist, avglosslist)
-        """
-        self.warm_up()
-
-        if self.logging:
-            print("Training...")
-
-        rewardList = []
-        lossList = []
-        rewarddeq = deque([], maxlen=100)
-        lossdeq = deque([], maxlen=100)
-        avgrewardlist = []
-        avglosslist = []
-
-        for n_epoch in range(self.epochs):
-            total_reward, total_loss = self.epoch()
-
-            rewardList.append(total_reward)
-            lossList.append(total_loss)
-            rewarddeq.append(total_reward)
-            lossdeq.append(total_loss)
-            avgreward = sum(rewarddeq) / len(rewarddeq)
-            avgloss = sum(lossdeq) / len(lossdeq)
-            avglosslist.append(avgloss)
-            avgrewardlist.append(avgreward)
-
-            if self.logging:
-                print(
-                    f"Epoch {n_epoch}: Loss {total_loss:.2f}, Reward {total_reward}, Avgloss {avgloss:.2f}, Avgreward {avgreward:.2f}, Epsilon {self.eps_threshold:.2f}, TotalStep {self.steps_done}"
-                )
-
-        self.env.close()
-
-        if self.logging != None:
-            # plot loss-epoch and reward-epoch
-            plt.figure(1)
-            plt.xlabel("Epoch")
-            plt.ylabel("Loss")
-            plt.plot(range(len(lossList)), lossList, label="loss")
-            plt.plot(range(len(lossList)), avglosslist, label="avg")
-            plt.legend()
-            plt.savefig(os.path.join(self.log_dir, "loss.png"))
-
-            plt.figure(2)
-            plt.xlabel("Epoch")
-            plt.ylabel("Reward")
-            plt.plot(range(len(rewardList)), rewardList, label="reward")
-            plt.plot(range(len(rewardList)), avgrewardlist, label="avg")
-            plt.legend()
-            plt.savefig(os.path.join(self.log_dir, "reward.png"))
-
-        return (rewardList, lossList), (avgrewardlist, avglosslist)

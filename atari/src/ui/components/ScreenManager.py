@@ -25,6 +25,12 @@ KV = """
 
     LoadTrained:
         id: trained
+        on_load_trained_at_epoch:
+            eval.load_trained_at_epoch(*args)
+            root.current = "eval"
+
+    EvalModel:
+        id: eval
 """
 
 Builder.load_string(KV)

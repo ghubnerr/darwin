@@ -5,3 +5,4 @@ from .LoadGame import LoadGame
 from .LoadGameModal import LoadGameModal
 from .LoadTrainedClickable import LoadTrainedClickable
 from .ScreenManager import ScreenManager
+from .TextureWidget import TextureWidget
