@@ -5,15 +5,16 @@ from kivy.lang import Builder
 from kivymd.uix.screen import MDScreen
 from src.load_trained import TrainedGame
 from src.ui.components import LoadTrainedClickable
-from src.ui.util import Util, kivy_callback
+from src.ui.util import Util, go_to_screen, kivy_callback
 
 KV = """
 <LoadTrained>:
     name: "trained"
 
+
     MDScrollView:
         MDGridLayout:
-            padding: 10, 50
+            padding: 10, 100
             cols: 5
             id: models
             size_hint_y: None
@@ -22,6 +23,14 @@ KV = """
             row_default_height: "300dp"
             col_default_width: "200dp"
             col_force_default: True
+
+    MDFloatLayout:
+        MDRectangleFlatIconButton:
+            size_hint: None, None
+            pos_hint: {"top": 1, "center_x": 0.5}
+            icon: "arrow-left"
+            text: "Go back"
+            on_press: root.go_back()
 
 """
 
@@ -34,13 +43,17 @@ class LoadTrained(MDScreen, Util):
         models = self.ids["models"]
 
         epochs = [int(path.basename(f).split(".")[0]) for f in data["models"]]
+        models.clear_widgets()
 
         # epochs = set(range(0, data["epochs"], data["eval_freq"]))
         # epochs.add(data["epochs"])
-        for epoch in sorted(epochs):
+        for epoch in sorted(epochs, reverse=True):
             clickable = LoadTrainedClickable(data, epoch)
             clickable.on_release = self.on_clickable_press
             models.add_widget(clickable)
 
     def on_clickable_press(self, epoch: int):
         print(epoch)
+
+    def go_back(self, *_):
+        go_to_screen("main")
