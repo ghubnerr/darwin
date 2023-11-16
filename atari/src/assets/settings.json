@@ -1,0 +1,72 @@
+[
+  {
+    "type": "numeric",
+    "title": "Learning Rate",
+    "desc": "How much the AI retains what it has learned recently \nDefault:2.5e-4",
+    "section": "AI Settings",
+    "key": "lr",
+    "cast": "float"
+  },
+  {
+    "type": "numeric",
+    "cast": "int",
+    "title": "Epochs",
+    "desc": "Number of times to train the AI \nDefault:10001",
+    "section": "AI Settings",
+    "key": "epochs"
+  },
+  {
+    "type": "numeric",
+    "title": "Batch Size",
+    "desc": "How many frames to pass to the model at the same time\n Default: 32",
+    "section": "AI Settings",
+    "key": "batch_size",
+    "cast": "int"
+  },
+  {
+    "type": "bool",
+    "title": "Use Dueling Deep Q Network",
+    "desc": "Use a neural network made for 2 player games \nDefault: False",
+    "section": "AI Settings",
+    "key": "use_ddqn"
+  },
+  {
+    "type": "numeric",
+    "title": "Model evaluation frequency",
+    "desc": "How often to evaluate the model and save a video \n Default: 500",
+    "section": "AI Settings",
+    "key": "eval_freq",
+    "cast": "int"
+  },
+  {
+    "type": "options",
+    "title": "Environment maximum timesteps calculation",
+    "desc": "Accompanying option to Max Number of Timesteps, which allows more fine grained control of how the maximum number of timesteps for an environment will be determined. \n 'override' will overwrite the environments maximum number of timesteps. 'lowest' will use the lowest between the environments default and specified maximum. 'highest' will use the highest between the two. \nDefault: 'lowest'",
+    "section": "AI Settings",
+    "key": "max_timesteps_calc",
+    "options": ["override", "lowest", "highest"]
+  },
+  {
+    "type": "numeric",
+    "title": "Max number of timesteps",
+    "desc": "The maximum number of timesteps / frames before the game is ended. A very low number will result in the AI not learning. Set to a  \n Default: 2500",
+    "section": "AI Settings",
+    "key": "max_timesteps",
+    "cast": "int"
+  },
+  {
+    "type": "options",
+    "title": "Device",
+    "desc": "Device to run the AI on, will crash the program if your computer does not support it",
+    "section": "AI Settings",
+    "key": "device",
+    "options": ["cpu", "cuda", "mpc"]
+  },
+  {
+    "type": "path",
+    "title": "Data folder",
+    "desc": "Where to save and load the AI models from and their videos",
+    "section": "AI Settings",
+    "key": "data_path"
+  }
+]
