@@ -1,7 +1,7 @@
 from os import path
 
 from kivy.lang import Builder
-from kivy.properties import DictProperty, NumericProperty
+from kivy.properties import DictProperty, NumericProperty, StringProperty
 from kivy.uix.video import Video
 from kivymd.uix.boxlayout import MDBoxLayout
 from src.load_trained import TrainedGame
@@ -34,6 +34,7 @@ KV = """
             height: root.height
             state: 'play'
             options: root.options
+            preview: root.preview
 
     AtariOverlayBox:
         id: box
@@ -65,12 +66,14 @@ class LoadTrainedClickable(SusSmartTile):
     data: TrainedGame
     epoch = NumericProperty(0)
     options = DictProperty({"eos": "loop", "speed": 0.25})
+    preview = StringProperty("")
 
     def __init__(self, data: TrainedGame, epoch: int, *args, **kwargs):
         self.data = data
         self.epoch = epoch
 
         self.source = path.join(data["path"], "videos", f"{epoch}.mp4")
+        self.preview = f"src/assets/atari/{self.data['slug']}.gif.png"
 
         super().__init__(*args, **kwargs)
 

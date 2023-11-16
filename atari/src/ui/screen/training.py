@@ -8,7 +8,7 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import MDScreen
 from src.ai.threaded import ThreadedTrainer
 from src.gameList import GameDict
-from src.ui.util import Util, go_to_screen_callback, kivy_callback
+from src.ui.util import Util, events, go_to_screen_callback, kivy_callback
 
 KV = """
 <TrainingScreen>:
@@ -47,6 +47,7 @@ KV = """
 Builder.load_string(KV)
 
 
+@events("done_training")
 class TrainingScreen(MDScreen, Util):
     training_text = StringProperty("")
     data: GameDict = None
@@ -156,7 +157,7 @@ class TrainingScreen(MDScreen, Util):
         self.loss_plt.points = []
         self.avg_plt.points = []
 
-        Clock.schedule_once(go_to_screen_callback("main"))
+        Clock.schedule_once(lambda *_: self.dispatch("on_done_training"))
 
     def stop_training(self):
         if self.training:

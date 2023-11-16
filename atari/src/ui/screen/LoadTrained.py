@@ -1,4 +1,5 @@
 from itertools import chain
+from os import path
 
 from kivy.lang import Builder
 from kivymd.uix.screen import MDScreen
@@ -32,8 +33,10 @@ class LoadTrained(MDScreen, Util):
     def load_trained(self, data: TrainedGame):
         models = self.ids["models"]
 
-        epochs = set(range(0, data["epochs"], data["eval_freq"]))
-        epochs.add(data["epochs"])
+        epochs = [int(path.basename(f).split(".")[0]) for f in data["models"]]
+
+        # epochs = set(range(0, data["epochs"], data["eval_freq"]))
+        # epochs.add(data["epochs"])
         for epoch in sorted(epochs):
             clickable = LoadTrainedClickable(data, epoch)
             clickable.on_release = self.on_clickable_press

@@ -1,20 +1,14 @@
 import src.ui.screen
 import src.ui.screen.training
 from kivy.lang import Builder
-from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.screenmanager import ScreenManager
-from kivymd.uix.tab import MDTabsBase
-
-
-class Tab(MDFloatLayout, MDTabsBase):
-    pass
-
 
 KV = """
 <Manager>:
     id: manager
 
     MainScreen:
+        id: main
         on_begin_training:
             root.current = "progress"
             training.begin_training(*args)
@@ -25,6 +19,9 @@ KV = """
 
     TrainingScreen:
         id: training
+        on_done_training:
+            main.reload_trained_tab()
+            root.current = "main"
 
     LoadTrained:
         id: trained

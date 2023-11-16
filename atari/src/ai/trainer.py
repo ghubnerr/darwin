@@ -424,6 +424,7 @@ class Trainer:
     def save_metadata(self):
         d = os.path.join(self.log_dir, "metadata.json")
         data = {
+            **self.game,
             "rewards": self.rewards,
             "losses": self.losses,
             "avg_rewards": self.avg_rewards,
@@ -437,9 +438,8 @@ class Trainer:
             "eval_freq": self.eval_freq,
             "device": self.device,
             "epochs": self.n_epochs,
-            "steps": self.n_epochs,
+            "steps": self.steps_done,
             "created": datetime.now().isoformat(),
-            **self.game,
         }
 
         json.dump(data, open(d, "w"), indent=2)

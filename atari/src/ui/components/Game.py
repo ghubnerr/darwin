@@ -11,13 +11,9 @@ from kivy.properties import (
 )
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.image import Image
-from kivymd import uix_path
 from kivymd.theming import ThemableBehavior
 from kivymd.uix.behaviors import RectangularRippleBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.fitimage import FitImage
-from kivymd.uix.imagelist import MDSmartTile
-from kivymd.uix.label import MDLabel
 from kivymd.uix.relativelayout import MDRelativeLayout
 from src.gameList import GameDict
 

@@ -37,6 +37,7 @@ class LoadTrainedTab(Tab, Util):
     def post_init(self, *_, **__):
         self.trained = load_trained()
         grid = self.ids["images_grid"]
+        grid.clear_widgets()
 
         for game in self.trained:
             g = LoadGame(game, on_press=self.on_game_press)
