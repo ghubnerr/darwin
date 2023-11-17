@@ -1,38 +1,50 @@
-![](https://github.com/maltfield/cross-platform-python-gui/workflows/build/badge.svg)
+# Darwin Atari Project
 
-# Cross Platform Python GUI
+![Main Screen](./assets/main.png)
 
-This repo is a fork-ready base for your new cross-platform, python-based GUI application.
+GUI tool to train Gynasium atari games
 
-It includes the CI pipeline to automatically build self-contained executables for Linux (AppImage), Windows (exe), and MacOS (dmg).
+**Select an atari game to train, change some hyperparameters, and watch the model train!**
 
-This project uses [kivy](https://kivy.org/), which also supports android and iOS--though building apps for these platforms hasn't been automated into GitHub Actions (yet). PRs Welcome! ;)
+# Features
 
-# How to use this repo
+Selection of [Hyperparameters](https://towardsdatascience.com/artificial-intelligence-hyperparameters-48fa29daa516) lke learning rate, batch size, device to train on, etc
 
-1. Fork this repo
-1. On your forked repo, go to the "Actions" tab and click "I understand my workflows, go ahead and enable them" to enable GitHub workflows
-1. Edit [src/main.py](/src/main.py) as needed
-1. Add any required python modules to [requirements.txt](/requirements.txt)
+Caches Neural Network, records videos, and logs the performance of the model over time
 
-When you push git commits to github on master, github will automatically spin up containers in the cloud and build your application's executables for all target platforms.
+# Examples of outputs
 
-# Demos
+## [Breakout](https://gymnasium.farama.org/environments/atari/breakout/)
 
-## "Hello World" App
+### Short Description
 
-Checkout our [Releases Section](https://github.com/maltfield/cross-platform-python-gui/releases) to download and run the self-contained `Hello World` executables for Linux, Windows, and MacOS that were built by this repo.
+You move a paddle and hit the ball in a brick wall at the top of the screen. Your goal is to destroy the brick wall. You can try to break through the wall and let the ball wreak havoc on the other side, all on its own! You have five lives.
 
- * [https://github.com/maltfield/cross-platform-python-gui/releases](https://github.com/maltfield/cross-platform-python-gui/releases)
+Action Space: One of 4 Discrete actions
 
-## In the wild
+Observation Space: 210 x 160 x 3 array
 
-The following apps have been built by forking this repo
-
- * [BusKill](https://github.com/buskill/buskill-app)
- * [Kivy Matrix Calculator](https://github.com/maltfield/kivy-matrix-calculator)
- * [Kivy Snake Game](https://github.com/nandanhere/cross-platform-python-gui/)
-
-# License
-
-The contents of this repo are dual-licensed. All code is GPLv3 and all other content is CC-BY-SA.
+| Epoch | Video                                  | Model                                                  |
+| ----- | -------------------------------------- | ------------------------------------------------------ |
+| 2045  | ![](./assets/breakout/videos/2045.mp4) | [Breakout 2045.pth](./assets/breakout/models/2045.pth) |
+| 2000  | ![](./assets/breakout/videos/200.mp4)  | [2000.pth](./assets/breakout/models/2000.pth)          |
+| 1900  | ![](./assets/breakout/videos/1900.mp4) | [1900.pth](./assets/breakout/models/1900.pth)          |
+| 1800  | ![](./assets/breakout/videos/1800.mp4) | [1800.pth](./assets/breakout/models/1800.pth)          |
+| 1700  | ![](./assets/breakout/videos/1700.mp4) | [1700.pth](./assets/breakout/models/1700.pth)          |
+| 1600  | ![](./assets/breakout/videos/1600.mp4) | [1600.pth](./assets/breakout/models/1600.pth)          |
+| 1500  | ![](./assets/breakout/videos/1500.mp4) | [1500.pth](./assets/breakout/models/1500.pth)          |
+| 1400  | ![](./assets/breakout/videos/1400.mp4) | [1400.pth](./assets/breakout/models/1400.pth)          |
+| 1300  | ![](./assets/breakout/videos/1300.mp4) | [1300.pth](./assets/breakout/models/1300.pth)          |
+| 1200  | ![](./assets/breakout/videos/1200.mp4) | [1200.pth](./assets/breakout/models/1200.pth)          |
+| 1100  | ![](./assets/breakout/videos/1100.mp4) | [1100.pth](./assets/breakout/models/1100.pth)          |
+| 1000  | ![](./assets/breakout/videos/1000.mp4) | [1000.pth](./assets/breakout/models/1000.pth)          |
+| 900   | ![](./assets/breakout/videos/900.mp4)  | [900.pth](./assets/breakout/models/900.pth)            |
+| 800   | ![](./assets/breakout/videos/800.mp4)  | [800.pth](./assets/breakout/models/800.pth)            |
+| 700   | ![](./assets/breakout/videos/700.mp4)  | [700.pth](./assets/breakout/models/700.pth)            |
+| 600   | ![](./assets/breakout/videos/600.mp4)  | [600.pth](./assets/breakout/models/600.pth)            |
+| 500   | ![](./assets/breakout/videos/500.mp4)  | [500.pth](./assets/breakout/models/500.pth)            |
+| 400   | ![](./assets/breakout/videos/400.mp4)  | [400.pth](./assets/breakout/models/400.pth)            |
+| 300   | ![](./assets/breakout/videos/300.mp4)  | [300.pth](./assets/breakout/models/300.pth)            |
+| 200   | ![](./assets/breakout/videos/200.mp4)  | [200.pth](./assets/breakout/models/200.pth)            |
+| 100   | ![](./assets/breakout/videos/100.mp4)  | [100.pth](./assets/breakout/models/100.pth)            |
+| 0     | ![](./assets/breakout/videos/0.mp4)    | [0.pth](./assets/breakout/models/0.pth)                |
