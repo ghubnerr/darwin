@@ -14,7 +14,13 @@ Caches Neural Network, records videos, and logs the performance of the model ove
 
 ## Video Demo
 
-**DEMO GOES HERE!!!**
+
+https://github.com/ghubnerr/darwin/assets/80722367/c7b37eb9-6310-4042-992e-8b956894dd82
+
+https://github.com/ghubnerr/darwin/assets/80722367/1f5f81c0-4e7c-4ab3-baf6-094ad62f8d2f
+
+
+
 
 ## Table of Contents
 
@@ -117,7 +123,7 @@ Observation Space: 210 x 160 x 3 array
 
 _Other versions of python may work but there is no guarantee_
 
-_As a rule of thumb, any python `3.10._` will likely work\_
+_As a rule of thumb, any python `3.10.*` will likely work_
 
 ## Getting started
 
