@@ -235,6 +235,5 @@ pyrightconfig.json
 .env-ipynb/
 log_*/
 main.ini
-models/
 notebook/tmp/
 data/
