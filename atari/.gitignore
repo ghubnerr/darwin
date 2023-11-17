@@ -236,6 +236,5 @@ pyrightconfig.json
 log_*/
 main.ini
 models/
-videos
 notebook/tmp/
 data/

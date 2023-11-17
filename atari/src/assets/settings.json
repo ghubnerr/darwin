@@ -60,7 +60,7 @@
     "desc": "Device to run the AI on, will crash the program if your computer does not support it",
     "section": "AI Settings",
     "key": "device",
-    "options": ["cpu", "cuda", "mpc"]
+    "options": ["cpu", "cuda", "mps"]
   },
   {
     "type": "path",
