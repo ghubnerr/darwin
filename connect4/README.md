@@ -27,7 +27,7 @@ Observations:
 - The reward function perhaps was not punishing the agent for missing obvious winning plays.
 - The Maskable PPO architecture's only goal appears to be ensuring that agents do not make illegal action moves in the game of Connect 4.
 - The algorithm is designed only to check for an illegal move, to improve performance of the AI, the model will have to be modified to include better reward functions for making unwise moves.
-- The algorithm only ensured that the same player won multiple times in a row. After 1,500,000 steps, Player 0 (red) won in each game, whereas, after only 20,000 steps, it was a 50/50 tie.
+- The algorithm only ensured that the same player won multiple times in a row. After 1,500,000 steps, Player 0 (red) won in each game, whereas, after only 20,000 steps, it was a 50/50 tie. Though, for some reason, in the 20,000-step training phase, the moves made appeared to be "smarter" than in the 1,500,000 step training phase, and the games were solved much quicker.
 
 Description
 -
