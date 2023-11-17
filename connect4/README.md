@@ -7,9 +7,11 @@ Trained Preview
 Installation Requirements:
 -
 To work on this project, the following dependencies are required.
-```pettingzoo[classic]>=1.24.0```
-```stable-baselines3>=2.0.0```
-```sb3-contrib>=2.0.0```
+```
+pettingzoo[classic]>=1.24.0
+stable-baselines3>=2.0.0
+sb3-contrib>=2.0.0
+```
 
 Observations:
 - 
