@@ -10,10 +10,18 @@ https://github.com/ghubnerr/darwin/assets/91924667/1403a870-6fa2-45a8-bdf5-5746d
 
 Observations
 -
-In the trained model, the agent was able to successfully maintain the balance of the sitck/pole with minimal angular discrepancies. 
+- In the trained model, the agent was able to successfully maintain the balance of the sitck/pole with minimal angular discrepancies. 
+- The agent is able to main an upright position of the stick until the episode terminates
+
 
 Dependencies
 -
+The Environment: 
+```
+import gymnasium as gym
+gym.make('CartPole-v1')
+```
+
 
 Description
 -
@@ -25,6 +33,19 @@ https://gymnasium.farama.org/environments/classic_control/cart_pole/
 Action Space
 -
 
+The action is a ndarray with shape (1,) which can take values {0, 1} indicating the direction of the fixed force the cart is pushed with.
+
+0: Push cart to the left
+
+1: Push cart to the right
+
+Note: The velocity that is reduced or increased by the applied force is not fixed and it depends on the angle the pole is pointing. The center of gravity of the pole varies the amount of energy needed to move the cart underneath it
+
 Rewards
 -
+A reward of +1 is given for every step taken, including the termination step, if the agent is able to maintain an upright position of the stick for as long as possible. The threshold for rewards is 500 for v1.
 
+Sources
+-
+
+Open AI Gymnasium: https://gymnasium.farama.org/environments/classic_control/cart_pole/
