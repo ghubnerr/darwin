@@ -41,8 +41,7 @@ for i in range(1000):
     if i % 25 == 0:
         agent.save_models()
 ```
-<hr />
-### The Team!
-![image](https://github.com/ghubnerr/darwin/assets/91924667/0b6cc57d-6d65-4bce-9f21-957505232e39)
+### The Team
 
 
+<img width="868" alt="image" src="https://github.com/ghubnerr/darwin/assets/91924667/ab4ceeb9-465e-4c67-8938-f837e117de87">
