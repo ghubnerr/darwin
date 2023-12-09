@@ -1,9 +1,10 @@
-# Project DARWIN
+# Project DARWIN -- Diving Into Reinforcement Learning
 
+https://github.com/ghubnerr/darwin/assets/80722367/c7b37eb9-6310-4042-992e-8b956894dd82
 
 ### PS: Visit Individual Folders for more Demo Videos! 
 
-## Diving Into Reinforcement Learning
+## RL in a Nutshell
 
 ![Atari training](https://github.com/ghubnerr/darwin/assets/91924667/ec58d1b9-e8c4-4822-b7d7-60bc3739052e)
 
